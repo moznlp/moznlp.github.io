@@ -2101,3 +2101,21 @@ responsive
     padding: 30px;
   }
 }
+
+.team {
+	background: #fafafa;
+	border-top: 1px solid #e4e4e4;
+}
+.team-detail {
+	margin-top:40px;
+}
+.team-detail img {
+	border-radius: 50%;
+	width: 70%;
+}
+.team-detail h4 {
+	/* color:rgb(142, 30, 252); */
+	margin-top: 20px;
+	font-size: 17px;
+	margin-bottom: 0px;
+}
