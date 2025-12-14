@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MOZNLP</title>
+
+  <!-- Simplified Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- Reset & Base ---------- */
+    *, *::before, *::after { box-sizing: border-box; }
+    body, h1, h2, p { margin:0; padding:0; }
+    img { max-width:100%; height:auto; display:block; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #e8e8e8;
+      color: #2c2c2c;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .container { width: min(92%, 1100px); margin:auto; }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    header h1 { 
+      font-size: 18px; 
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .lang-switch {
+      display: flex;
+      gap: .5rem;
+      font-weight: 500;
+      font-size: 13px;
+    }
+    .lang-switch a { 
+      color: #666; 
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all .2s;
+    }
+    .lang-switch a:hover { 
+      background: #f5f5f5;
+      color: #1a1a1a;
+    }
+
+    main { padding-block: 2rem; }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 24px; color: #1a1a1a; }
+    h2 { font-size: 18px; color: #2c2c2c; }
+
+    section { margin-bottom: 3rem; }
+
+    /* ---------- Executive Summary ---------- */
+    .summary {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid #e5e5e5;
+      max-width: 750px;
+      margin: auto;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #4a4a4a;
+    }
+
+    /* ---------- Book Sample ---------- */
+    .book-sample {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: flex-start;
+      justify-content: center;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .book-cover img {
+      width: 120px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+
+    .book-info { flex: 1; min-width: 280px; }
+    .book-info p { 
+      margin-bottom: 1rem;
+      font-size: 14px;
+      color: #4a4a4a;
+    }
+    .book-info a { 
+      color: #2563eb;
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color .2s;
+    }
+    .book-info a:hover { border-bottom-color: #2563eb; }
+
+    @media (max-width: 640px) {
+      .book-sample { flex-direction: column; align-items: center; }
+      .book-cover { order: 1; }
+      .book-info   { order: 2; width: 100%; }
+    }
+
+    /* ---------- Carousel ---------- */
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      max-width: 550px;
+      margin: 1.5rem auto;
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform .4s ease;
+    }
+    .carousel-item {
+      min-width: 100%;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .author-photo {
+      flex-shrink: 0;
+    }
+    
+    .carousel-item img {
+      width: 100px; 
+      height: 100px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid #f5f5f5;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    
+    .author-content {
+      flex: 1;
+      text-align: left;
+    }
+    
+    .carousel-item strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #1a1a1a;
+    }
+
+    .author-bio {
+      background: #f8f9fa;
+      padding: 0.875rem 1rem;
+      border-radius: 6px;
+      border-left: 3px solid #2563eb;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: opacity .3s ease, transform .3s ease;
+    }
+    .carousel-item.active .author-bio {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    @media (max-width: 500px) {
+      .carousel-item {
+        flex-direction: column;
+        text-align: center;
+      }
+      .author-content {
+        text-align: center;
+      }
+    }
+
+    .carousel-buttons button {
+      position: absolute;
+      top: 50%; 
+      transform: translateY(-50%);
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      width: 36px; 
+      height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      color: #666;
+    }
+    .carousel-buttons button:hover { 
+      background: #f5f5f5;
+      border-color: #d4d4d4;
+      color: #1a1a1a;
+    }
+    .carousel-buttons button:first-child { left: 8px; }
+    .carousel-buttons button:last-child { right: 8px; }
+
+    /* ---------- Agenda Table ---------- */
+    .agenda { overflow-x: auto; margin-top: 1rem; }
+    table {
+      width: 100%;
+      min-width: 300px;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e5e5e5;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    th {
+      background: #fafafa;
+      color: #1a1a1a;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    td { color: #4a4a4a; }
+    tr:last-child td { border-bottom: none; }
+
+    /* ---------- App Section ---------- */
+    /* ---------- App Section ---------- */
+    .apps-section { 
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 3rem 1.5rem;
+      border-radius: 12px;
+      margin: 2rem auto;
+      max-width: 900px;
+    }
+    .apps-section h2 {
+      color: #fff;
+      margin-bottom: 0.5rem;
+      font-size: 20px;
+    }
+    .apps-section p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 2rem;
+    }
+    .app-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+    .app-links a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      background: #fff;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #1a1a1a;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all .3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      min-width: 200px;
+    }
+    .app-links a:hover { 
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    }
+    .app-links img { 
+      height: 60px;
+      width: 60px;
+      object-fit: contain;
+    }
+
+    /* ---------- Partners ---------- */
+    .partners-logos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 850px;
+      margin: auto;
+    }
+    .partners-logos img {
+      width: 100%;
+      max-width: 120px;
+      object-fit: contain;
+      
+      padding: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid #e5e5e5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #fff;
+      border-top: 1px solid #e5e5e5;
+      color: #666;
+      font-size: 13px;
+    }
+
+    @media (pointer: coarse) {
+      .carousel-buttons button { width: 40px; height: 40px; }
+    }
+
+    /* ---------- Botão de Informação Completa ---------- */
+.info-button {
+  display: inline-block;
+  background: #2c5282;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all .25s ease;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+.info-button:hover {
+  background: #1a365d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+@media (max-width: 500px) {
+  .info-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+
+/* ---------- Contact Section ---------- */
+.contact-section {
+  background: #fff;
+  padding: 2rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  max-width: 600px;
+  margin: 2rem auto;
+  text-align: center;
+  font-size: 14px;
+  color: #4a4a4a;
+}
+
+.contact-section h2 {
+  font-size: 18px;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.contact-info p {
+  margin: 0.75rem 0;
+}
+
+.contact-info a {
+  color: #2c5282;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: all .2s;
+}
+
+.contact-info a:hover {
+  color: #1a365d;
+  border-bottom-color: #2c5282;
+}
+
+/* ---------- Google Form Embed Container ---------- */
+.google-form-container {
+  max-width: 750px; /* Adjust as needed */
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  overflow: hidden; /* Important for containing the iframe on some mobile views */
+}
+
+.google-form-container iframe {
+  width: 100%;
+  /* You can set a height, but Google Forms typically comes with a fixed height.
+    The value below is a common default or a good starting point for a responsive iframe.
+    Check the height provided by Google's embed code and adjust if necessary. */
+  height: 1200px; 
+  border: none; /* Remove default iframe border */
+  margin: 0;
+  padding: 0;
+}
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Digitalização, Línguas Moçambicanas e Inteligência Artificial</h1>
+    <!-- <nav class="lang-switch">
+      <a href="#" aria-label="Português">Português</a>
+      <a href="#" aria-label="Emakhuwa">Emakhuwa</a>
+      <a href="#" aria-label="Changana">Changana</a>
+      <a href="#" aria-label="Changana">Sena</a>
+      <a href="#" aria-label="Changana">Yao</a>
+    </nav> -->
+  </header>
+
+  <main class="container">
+    <!-- <section>
+      <h1>Programa do Evento</h1>
+    </section> -->
+
+    <!-- Executive Summary -->
+    <!-- <div class="summary">
+      <h2>Nota Conceptual </h2>
+      <p>Este evento tem como objetivo apresentar oficialmente o novo livro dedicado à transformação digital e às tecnologias de linguagem, promover discussões estratégicas sobre inovação tecnológica aplicada à inteligência artificial para tecnologias de linguagem voltadas às línguas moçambicanas, fortalecer a colaboração entre a academia, o governo e organizações internacionais, além de incentivar um debate aprofundado sobre o papel das línguas moçambicanas no contexto digital.</p>
+    
+  <div style="text-align: center; margin-top: 1.5rem;">
+    <a href="https://drive.google.com/file/d/1psoJvA3J-xxXOW7qa-hVSopM0UowrFmz/view?usp=sharing" class="info-button" target="_blank">
+      Ver Nota Conceptual Completa
+    </a>
+  </div>
+    </div> -->
+
+    <br/>
+    <!-- Book Sample + Carousel + Bio -->
+    <section>
+      <h2>Amostra do Livro</h2>
+      <div class="book-sample">
+        <!-- Cover -->
+        <div class="book-cover">
+          <img src="assets/images/cover.png" alt="Capa do Livro">
+        </div>
+
+        <!-- Info + Carousel -->
+        <div class="book-info">
+          <p>Faça download de uma amostra gratuita do livro aqui: <a href="https://drive.google.com/file/d/1lN_001VkxGUbAv_ojTkCE6E8cO7_V-kL/view?usp=sharing" target="_blank">Clique para abrir a amostra</a></p>
+
+          <div class="carousel" id="carousel">
+            <div class="carousel-track" id="carousel-track">
+              <!-- Author 1 -->
+              <div class="carousel-item">
+                <img src="assets/images/armando-muchanga.jpg" alt="Apresentação da obra">
+                <strong class="tiny">Excia Prof. Doutor Américo Muchanga</strong>
+                <div class="author-bio">
+                  Ministro das Comunicações e Transformação Digital
+                </div>
+              </div>
+
+              <!-- Author 2 -->
+              <div class="carousel-item">
+                <img src="assets/images/salomao-moaiana.jpg" alt="Comentários">
+                <strong>Dr. Salomão Moiana</strong>
+                <div class="author-bio">
+                  Comentários
+                </div>
+              </div>
+
+              <!-- Author 3 -->
+              <div class="carousel-item">
+                <img src="assets/images/isau-meneses.jpg" alt="Comentários">
+                <strong>Prof. Doutor Isaú Menezes</strong>
+                <div class="author-bio">
+                  Comentários
+                </div>
+              </div>
+            
+
+            <div class="carousel-item">
+                <img src="assets/images/nhambiu.jpg" alt="Comentários">
+                <strong>Prof. Doutor Jorge Nhambiu</strong>
+                <div class="author-bio">
+                  Comentários
+                </div>
+              </div>
+            </div>
+
+            </div>
+            <div class="carousel-buttons">
+              <button id="prev" aria-label="Anterior">‹</button>
+              <button id="next" aria-label="Próximo">›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+
+
+
+    <!-- Agenda -->
+<section>
+  <h2>Agenda</h2>
+  <div class="agenda">
+    <table>
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>Atividade</th>
+          <th>Interveniente</th>
+          <th>Moderação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Opening -->
+        <tr>
+          <td>09:00 – 09:30</td>
+          <td>Chegada dos participantes</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>09:30 – 09:50</td>
+          <td>Notas de Boas Vindas e Abertura</td>
+          <td>
+            Profª. Dra. Ezra Chambal Nhampoca (Directora da ECA, UEM)<br>
+            Prof. Dr. Manuel Chenene (Director do Gabinete de Cooperação, UEM)
+          </td>
+          <td>Alice Tivane</td>
+        </tr>
+        <tr>
+          <td>09:50 – 10:00</td>
+          <td>Enquadramento do Seminário e apresentação do projecto MOZNLP-UP</td>
+          <td>Dra. Delfina Lázaro Mateus</td>
+          <td>-</td>
+        </tr>
+
+        <!-- Painel 1 -->
+        <tr>
+          <td colspan="4"><strong>Painel 1: Pensar o Futuro das Línguas Moçambicanas na Era Digital</strong></td>
+        </tr>
+        <tr>
+          <td>10:00 – 10:15</td>
+          <td>Línguas moçambicanas no contexto do Processamento de Linguagem Natural</td>
+          <td>Eng. Felermino Ali (UniLúrio)</td>
+          <td>Dr. Zeferino Ugembe</td>
+        </tr>
+        <tr>
+          <td>10:15 – 10:30</td>
+          <td>Experiência de criação de uma página em língua moçambicana (Xizronga.org)</td>
+          <td>Dr. Armando Magaia (FLCS, UEM)</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>10:30 – 10:45</td>
+          <td>Muito Além da Tradução: O Poder da IA no Ensino de Línguas</td>
+          <td>Eng. Elton Sixpence (ISUTC)</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>10:45 – 11:10</td>
+          <td>Debate</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+
+        <!-- Painel 2 -->
+        <tr>
+          <td colspan="4"><strong>Painel 2: Línguas Moçambicanas no Digital – Experiências e Perspectivas</strong></td>
+        </tr>
+        <tr>
+          <td>11:15 – 11:45</td>
+          <td>Criação de conteúdos em Línguas Moçambicanas</td>
+          <td>
+            Dra. Francesca Bruschi (Consultora)<br>
+            Profª. Dra. Samima Patel (Associação Progresso)<br>
+            Linc. Egídio Monjane (INDE)
+          </td>
+          <td>Mestre Cledy Marinela</td>
+        </tr>
+        <tr>
+          <td>11:45 – 12:00</td>
+          <td>Médias digitais e Línguas Moçambicanas</td>
+          <td>
+            Pedro Loforte (Instagram – ensino Xichangana)<br>
+            Jaime Langa (Instagram – culinária em Xichangana)<br>
+            Pe. Cantífula de Castro (Emakhuwa.org)
+          </td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>12:00 – 12:10</td>
+          <td>Inteligência Artificial e Línguas Moçambicanas</td>
+          <td>
+            Malagy Cassamo (MozDevz)<br>
+            Ekoko Clesh (UniLúrio)
+          </td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>12:10 – 12:25</td>
+          <td>Debate</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>12:30 – 12:40</td>
+          <td>Apresentação do Grupo Moçambicano de Processamento de Linguagem Natural (MOZNLP) e convite ao lançamento de livro</td>
+          <td>Prof. Catedrático Armindo Ngunga, Eng. Felermino Ali</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>12:40 – 13:40</td>
+          <td>Intervalo e Lanche</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+
+        <!-- Lançamento de Livro -->
+        <tr>
+          <td>13:45 – 13:50</td>
+          <td>Apresentação do programa do lançamento do livro</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>13:50 – 14:00</td>
+          <td>Momento cultural</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td colspan="4"><strong>Lançamento de Livro: "Digitalização das Línguas Moçambicanas e Inteligência Artificial: Perspectivas e desafios"</strong></td>
+        </tr>
+        <tr>
+          <td>14:00 – 14:15</td>
+          <td>Política Nacional de Digitalização</td>
+          <td>Excia Prof. Dr. Américo Muchanga (Ministro das Comunicações e Transformação Digital)</td>
+          <td>Alice Tivane</td>
+        </tr>
+        <tr>
+          <td>14:15 – 14:30</td>
+          <td>Apresentação do Livro</td>
+          <td>Prof. Dr. Jorge Nhambiu (Faculdade de Engenharias, UEM)</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>14:30 – 14:50</td>
+          <td>Comentários ao livro</td>
+          <td>Prof. Dr. Isaú Menezes<br>Dr. Salomão Moiana</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>14:50 – 14:55</td>
+          <td>Notas dos Autores</td>
+          <td>Eng. Rafael Mapfumo</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>14:55 – 15:05</td>
+          <td>Notas dos Editores</td>
+          <td>Prof. Catedrático Armindo Ngunga<br>Prof. Dr. António Ndapassoa</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>15:05 – 15:10</td>
+          <td>Notas de Encerramento</td>
+          <td>Profª. Dra. Ezra Chambal Nhampoca (Directora da ECA, UEM)</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>15:10</td>
+          <td>Foto família e assinatura de Autógrafos</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+    <!-- Partners -->
+    <!-- <section>
+      <h2>Parceiros</h2>
+      <div class="partners-logos">
+        <img src="assets/images/uem.png" alt="Parceiro 1">
+        <img src="assets/images/unilurio.jpg" alt="Parceiro 2">
+        <img src="partner3.png" alt="Parceiro 3">
+        <img src="partner4.png" alt="Parceiro 4">
+      </div>
+    </section> -->
+
+      <section>
+      <h2>Formulário de Inscrição / Registo</h2>
+      <div class="google-form-container">
+<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSffClbNO4R01eLvPz2obiQHw60UiHe4n6xlIWare-ovq-JLJw/viewform?embedded=true" width="640" height="882" frameborder="0" marginheight="0" marginwidth="0">A carregar…</iframe>
+      </div>
+    </section>
+
+
+
+    <!-- Contact Section -->
+<!-- <section class="contact-section">
+  <h2>Contatos</h2>
+  <div class="contact-info">
+    <p><strong>E-mail:</strong> <a href="mailto:musaling.mz@gmail.com">musaling.mz@gmail.com</a></p>
+    <p><strong>Telefone (Whatsap):</strong> <a href="tel:+258846689637">+258 84 668 9637</a></p>
+  </div> -->
+
+    <!-- App Section --> 
+     <section class="apps-section">
+      <h2>Aplicativo de tradução para línguas de Moçambique</h2>
+      
+      <div class="app-links">
+        <!-- <a href="#" target="_blank"><img src="assets/images/logo.png" alt="Musaling App">Musaling App</a> -->
+        <a href="https://felerminoali.pythonanywhere.com/pt/translator/" target="_blank"><h1>Musaling Online</h1>
+      </div>
+    </section>
+</section>
+
+
+</main>
+
+  <footer>
+    <p>© 2025 Evento de Lançamento – Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    const track = document.getElementById('carousel-track');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const items = document.querySelectorAll('.carousel-item');
+    let index = 0;
+    let startX = 0;
+
+    function goToSlide(i) {
+      index = (i + items.length) % items.length;
+      track.style.transform = `translateX(-${index * 100}%)`;
+      items.forEach((item, idx) => {
+        item.classList.toggle('active', idx === index);
+      });
+    }
+
+    prevBtn.addEventListener('click', () => goToSlide(index - 1));
+    nextBtn.addEventListener('click', () => goToSlide(index + 1));
+
+    let autoplay = setInterval(() => goToSlide(index + 1), 4000);
+    const carousel = document.getElementById('carousel');
+    carousel.addEventListener('mouseenter', () => clearInterval(autoplay));
+    carousel.addEventListener('mouseleave', () => autoplay = setInterval(() => goToSlide(index + 1), 4000));
+
+    carousel.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      clearInterval(autoplay);
+    }, {passive: true});
+    carousel.addEventListener('touchend', e => {
+      const endX = e.changedTouches[0].clientX;
+      const diff = startX - endX;
+      if (Math.abs(diff) > 50) goToSlide(index + (diff > 0 ? 1 : -1));
+      autoplay = setInterval(() => goToSlide(index + 1), 4000);
+    });
+
+    goToSlide(0);
+  </script>
+</body>
+</html>
